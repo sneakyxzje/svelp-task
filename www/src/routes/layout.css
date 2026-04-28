@@ -1,0 +1,116 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+@theme {
+	/* Background Surfaces */
+	--color-marketing-black: #08090a;
+	--color-panel-dark: #0f1011;
+	--color-surface-level-3: #191a1b;
+	--color-surface-secondary: #28282c;
+
+	/* Text & Content */
+	--color-text-primary: #f7f8f8;
+	--color-text-secondary: #d0d6e0;
+	--color-text-tertiary: #8a8f98;
+	--color-text-quaternary: #62666d;
+
+	/* Brand & Accent */
+	--color-brand-indigo: #5e6ad2;
+	--color-accent-violet: #7170ff;
+	--color-accent-hover: #828fff;
+	--color-security-lavender: #7a7fad;
+
+	/* Status Colors */
+	--color-status-green: #27a644;
+	--color-status-emerald: #10b981;
+
+	/* Border Colors */
+	--color-border-primary: #23252a;
+	--color-border-secondary: #34343a;
+	--color-border-tertiary: #3e3e44;
+	--color-border-subtle: rgba(255, 255, 255, 0.05);
+	--color-border-standard: rgba(255, 255, 255, 0.08);
+
+	/* Border Radius Scale */
+	--radius-micro: 2px;
+	--radius-standard: 4px;
+	--radius-comfortable: 6px;
+	--radius-card: 8px;
+	--radius-panel: 12px;
+	--radius-large: 22px;
+
+	/* Font Weights */
+	--font-weight-signature: 510;
+	--font-weight-strong: 590;
+
+	/* Typography Features */
+	--font-inter: 'Inter Variable', sans-serif;
+	--font-mono: 'Berkeley Mono', ui-monospace, SF Mono, Menlo, monospace;
+
+	/* shadcn-svelte compatibility mapping */
+	--color-background: var(--color-marketing-black);
+	--color-foreground: var(--color-text-primary);
+
+	--color-card: var(--color-surface-level-3);
+	--color-card-foreground: var(--color-text-primary);
+
+	--color-popover: var(--color-surface-level-3);
+	--color-popover-foreground: var(--color-text-primary);
+
+	--color-primary: var(--color-brand-indigo);
+	--color-primary-foreground: #ffffff;
+
+	--color-secondary: var(--color-surface-secondary);
+	--color-secondary-foreground: var(--color-text-primary);
+
+	--color-muted: var(--color-surface-secondary);
+	--color-muted-foreground: var(--color-text-tertiary);
+
+	--color-accent: var(--color-surface-secondary);
+	--color-accent-foreground: var(--color-text-primary);
+
+	--color-destructive: #ef4444;
+	--color-destructive-foreground: #f7f8f8;
+
+	--color-border: var(--color-border-standard);
+	--color-input: var(--color-border-standard);
+	--color-ring: var(--color-accent-violet);
+
+	--radius-xl: var(--radius-large);
+	--radius-lg: var(--radius-panel);
+	--radius-md: var(--radius-card);
+	--radius-sm: var(--radius-comfortable);
+}
+
+:root {
+	font-family: var(--font-inter);
+	font-feature-settings:
+		'cv01' 1,
+		'ss03' 1;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	background-color: var(--color-marketing-black);
+	color: var(--color-text-primary);
+
+	/* Default shadcn variables for components that use them directly */
+	--background: 0 0% 3.9%;
+	--foreground: 0 0% 98%;
+	--card: 0 0% 3.9%;
+	--card-foreground: 0 0% 98%;
+	--popover: 0 0% 3.9%;
+	--popover-foreground: 0 0% 98%;
+	--primary: 226 58% 60%;
+	--primary-foreground: 0 0% 100%;
+	--secondary: 0 0% 14.9%;
+	--secondary-foreground: 0 0% 98%;
+	--muted: 0 0% 14.9%;
+	--muted-foreground: 0 0% 63.9%;
+	--accent: 0 0% 14.9%;
+	--accent-foreground: 0 0% 98%;
+	--destructive: 0 62.8% 30.6%;
+	--destructive-foreground: 0 0% 98%;
+	--border: 0 0% 14.9%;
+	--input: 0 0% 14.9%;
+	--ring: 0 0% 83.1%;
+}
