@@ -8,15 +8,15 @@ public class User {
     private String username;
     private String email;
     private String password;
-    private Role roles;
+    private Role role;
 
-    public User(Long id, String fullname, String username, String email, String password, Role roles) {
+    public User(Long id, String fullname, String username, String email, String password, Role role) {
         this.id = id;
         this.fullname = fullname;
         this.username = username;
         this.email = email;
         this.password = password;
-        this.roles = roles;
+        this.role = role;
     }
 
     public Long getId() {
@@ -40,6 +40,6 @@ public class User {
     }
 
     public Role getRoles() {
-        return this.roles;
+        return this.role;
     }
 }
