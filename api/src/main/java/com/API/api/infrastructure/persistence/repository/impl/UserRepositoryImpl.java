@@ -8,14 +8,14 @@ import com.API.api.domain.model.User;
 import com.API.api.domain.repository.UserRepository;
 import com.API.api.infrastructure.persistence.entity.UserEntity;
 import com.API.api.infrastructure.persistence.mapper.UserMapper;
-import com.API.api.infrastructure.persistence.repository.JUserRepository;
+import com.API.api.infrastructure.persistence.repository.JpaUserRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
-public class IUserRepository implements UserRepository {
-    private final JUserRepository jUserRepository;
+public class UserRepositoryImpl implements UserRepository {
+    private final JpaUserRepository jUserRepository;
 
     public Optional<User> findByEmail(String email) {
         Optional<UserEntity> entity = jUserRepository.findByEmail(email);
@@ -24,6 +24,11 @@ public class IUserRepository implements UserRepository {
 
     public Optional<User> findByUsername(String username) {
         Optional<UserEntity> entity = jUserRepository.findByUsername(username);
+        return entity.map(UserMapper::toDomain);
+    }
+
+    public Optional<User> findByEmailOrUsername(String identity) {
+        Optional<UserEntity> entity = jUserRepository.findByEmailOrUsername(identity, identity);
         return entity.map(UserMapper::toDomain);
     }
 
