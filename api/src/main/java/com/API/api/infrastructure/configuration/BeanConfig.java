@@ -6,6 +6,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.API.api.application.port.PasswordEncode;
+import com.API.api.application.port.TokenService;
+import com.API.api.application.usecase.auth.LoginUseCase;
 import com.API.api.application.usecase.auth.RegisterUseCase;
 import com.API.api.domain.repository.UserRepository;
 
@@ -20,5 +22,10 @@ public class BeanConfig {
     @Bean
     public RegisterUseCase registerUseCase(UserRepository repo, PasswordEncode encode) {
         return new RegisterUseCase(repo, encode);
+    }
+
+    @Bean
+    public LoginUseCase loginUseCase(UserRepository userRepository, PasswordEncode encode, TokenService tokenService) {
+        return new LoginUseCase(userRepository, encode, tokenService);
     }
 }
