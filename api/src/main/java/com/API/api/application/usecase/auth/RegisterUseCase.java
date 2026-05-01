@@ -16,16 +16,16 @@ public class RegisterUseCase {
         this.passwordEncode = passwordEncode;
     }
 
-    public void register(RegisterCommand commands) {
-        if (userRepository.existsByUsername(commands.username())) {
+    public void register(RegisterCommand command) {
+        if (userRepository.existsByUsername(command.username())) {
             throw new RuntimeException("Username already exists");
         }
 
-        if (userRepository.existsByEmail(commands.email())) {
+        if (userRepository.existsByEmail(command.email())) {
             throw new RuntimeException("Email already exists");
         }
-        String hashed = passwordEncode.encode(commands.password());
-        User user = new User(null, commands.fullname(), commands.username(), commands.email(), hashed,
+        String hashed = passwordEncode.encode(command.password());
+        User user = new User(null, command.fullname(), command.username(), command.email(), hashed,
                 Role.USER);
         userRepository.save(user);
     }
