@@ -9,10 +9,14 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class PasswordHash implements PasswordEncode {
+public class PasswordEncoderImpl implements PasswordEncode {
     private final PasswordEncoder encoder;
 
     public String encode(String password) {
         return encoder.encode(password);
+    }
+
+    public boolean matches(String rawPassword, String encodePassword) {
+        return encoder.matches(rawPassword, encodePassword);
     }
 }
