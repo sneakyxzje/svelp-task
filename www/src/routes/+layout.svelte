@@ -1,12 +1,19 @@
 <script lang="ts">
+	import { Toaster } from 'svelte-sonner';
 	import './layout.css';
 	let { children } = $props();
 </script>
 
-<div class="relative min-h-screen bg-marketing-black text-text-primary selection:bg-brand-indigo/30 selection:text-white">
+<Toaster richColors theme="dark" position="bottom-right" />
+
+<div
+	class="relative min-h-screen bg-marketing-black text-text-primary selection:bg-brand-indigo/30 selection:text-white"
+>
 	<!-- Global Grainy Overlay (Optional, for that premium feel) -->
-	<div class="fixed inset-0 pointer-events-none z-50 opacity-[0.03] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
-	
+	<div
+		class="pointer-events-none fixed inset-0 z-50 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay"
+	></div>
+
 	{@render children()}
 </div>
 
