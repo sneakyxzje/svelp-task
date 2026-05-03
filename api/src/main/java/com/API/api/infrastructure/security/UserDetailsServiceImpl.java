@@ -22,7 +22,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findById(Long.parseLong(idOrUsername))
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + idOrUsername));
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(String.valueOf("ROLE_" + user.getRoles()));
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(), user.getPassword(), List.of(authority));
+        return new UserPrincipal(user.getId(), user.getUsername(), user.getPassword(), List.of(authority));
     }
 }
