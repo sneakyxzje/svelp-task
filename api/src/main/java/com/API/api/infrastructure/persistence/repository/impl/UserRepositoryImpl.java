@@ -27,6 +27,11 @@ public class UserRepositoryImpl implements UserRepository {
         return entity.map(UserMapper::toDomain);
     }
 
+    public Optional<User> findById(Long id) {
+        Optional<UserEntity> entity = jUserRepository.findById(id);
+        return entity.map(UserMapper::toDomain);
+    }
+
     public Optional<User> findByEmailOrUsername(String identity) {
         Optional<UserEntity> entity = jUserRepository.findByEmailOrUsername(identity, identity);
         return entity.map(UserMapper::toDomain);
