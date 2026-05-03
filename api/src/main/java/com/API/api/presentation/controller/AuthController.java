@@ -48,7 +48,7 @@ public class AuthController {
                                 .secure(false)
                                 .path("/")
                                 .maxAge(86400)
-                                .sameSite("Strict")
+                                .sameSite("Lax")
                                 .build();
 
                 return ResponseEntity.ok()
