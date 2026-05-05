@@ -11,4 +11,9 @@ public interface JpaBoardRepository extends JpaRepository<BoardEntity, Long> {
     Optional<BoardEntity> findByName(String name);
 
     List<BoardEntity> findAllByWorkspaceId(Long workspaceId);
+
+    Optional<BoardEntity> findBySlugAndWorkspace_Slug(String slug, String workspaceSlug);
+
+    boolean existsBySlugAndWorkspaceId(String slug, Long workspaceId);
+
 }
