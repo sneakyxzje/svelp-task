@@ -10,11 +10,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "boards")
+@Table(name = "boards", uniqueConstraints = {
+        @UniqueConstraint(name = "uc_board_slug_workspace", columnNames = { "slug", "workspace_id" })
+})
 @Getter
 @Setter
 public class BoardEntity {
