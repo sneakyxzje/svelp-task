@@ -14,5 +14,5 @@ public interface WorkspaceRepository {
 
     Optional<Workspace> findBySlug(String slug);
 
-    boolean existsBySlugAndOwnerId(String slug, Long ownerId);
+    boolean existsBySlug(String slug);
 }
