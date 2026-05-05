@@ -10,5 +10,12 @@ public interface BoardRepository {
 
     Optional<Board> findByName(String name);
 
+    Optional<Board> findById(Long id);
+
     List<Board> findAllByWorkspaceId(Long workspaceId);
+
+    Optional<Board> findBySlugAndWorkspaceSlug(String slug, String workspaceSlug);
+
+    boolean existsBySlugAndWorkspaceId(String slug, Long workspaceId);
+
 }
