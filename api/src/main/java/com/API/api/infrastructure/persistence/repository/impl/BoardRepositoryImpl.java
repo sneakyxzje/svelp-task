@@ -30,10 +30,25 @@ public class BoardRepositoryImpl implements BoardRepository {
         return entity.map(BoardMapper::toDomain);
     }
 
+    public Optional<Board> findById(Long id) {
+        Optional<BoardEntity> entity = jpaBoardRepository.findById(id);
+        return entity.map(BoardMapper::toDomain);
+    }
+
     @Override
     public List<Board> findAllByWorkspaceId(Long workspaceId) {
         return jpaBoardRepository.findAllByWorkspaceId(workspaceId).stream()
                 .map(BoardMapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Board> findBySlugAndWorkspaceSlug(String slug, String workspaceSlug) {
+        return jpaBoardRepository.findBySlugAndWorkspace_Slug(slug, workspaceSlug).map(BoardMapper::toDomain);
+    }
+
+    @Override
+    public boolean existsBySlugAndWorkspaceId(String slug, Long workspaceId) {
+        return jpaBoardRepository.existsBySlugAndWorkspaceId(slug, workspaceId);
     }
 }
