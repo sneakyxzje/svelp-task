@@ -41,7 +41,8 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
         return entity.map(WorkspaceMapper::toDomain);
     }
 
-    public boolean existsBySlugAndOwnerId(String slug, Long ownerId) {
-        return jpaWorkspaceRepository.existsBySlugAndOwnerId(slug, ownerId);
+    @Override
+    public boolean existsBySlug(String slug) {
+        return jpaWorkspaceRepository.existsBySlug(slug);
     }
 }
