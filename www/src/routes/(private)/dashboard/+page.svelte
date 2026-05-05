@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Mountain, Plus, Users, ArrowRight, LayoutGrid, Settings, Star } from 'lucide-svelte';
-	import { fly } from 'svelte/transition';
+	import { fly, fade } from 'svelte/transition';
+	
 	let { data } = $props();
 	let workspaces = $derived(data.workspaces || []);
 </script>
@@ -9,7 +10,7 @@
 	<title>Svelp Dashboard</title>
 </svelte:head>
 
-<div class="space-y-12 py-6" in:fly={{ y: 20, duration: 600 }}>
+<div class="mx-auto max-w-5xl space-y-12 py-6" in:fade={{ duration: 200 }}>
 	<div class="flex flex-col items-center space-y-2 text-center">
 		<h1 class="font-weight-strong text-3xl tracking-[-0.03em] text-text-primary">Welcome back</h1>
 		<p class="text-text-tertiary">Select a workspace to start collaborating with your team.</p>
@@ -29,9 +30,9 @@
 				<div class="space-y-4">
 					<div class="flex items-start justify-between">
 						<div
-							class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg shadow-black/20"
+							class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-indigo/20 to-brand-indigo/5 shadow-lg shadow-black/20"
 						>
-							<Mountain class="h-6 w-6 text-white" />
+							<Mountain class="h-6 w-6 text-brand-indigo" />
 						</div>
 						<button
 							class="rounded-md p-1.5 text-text-quaternary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
@@ -53,7 +54,7 @@
 				<div class="mt-8 flex items-center justify-between border-t border-white/[0.05] pt-4">
 					<div class="flex items-center gap-1.5 text-xs text-text-tertiary">
 						<Users class="h-3.5 w-3.5" />
-						<!-- <span>{ws.members} members</span> -->
+						<span>Members</span>
 					</div>
 					<div
 						class="flex h-8 w-8 items-center justify-center rounded-full bg-white/[0.03] text-text-quaternary transition-all group-hover:bg-brand-indigo group-hover:text-white"
