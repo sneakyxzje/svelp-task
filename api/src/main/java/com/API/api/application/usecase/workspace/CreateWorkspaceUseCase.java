@@ -19,8 +19,8 @@ public class CreateWorkspaceUseCase {
         String finalSlug = (command.slug() == null || command.slug().isBlank())
                 ? generateSlug(command.name())
                 : generateSlug(command.slug());
-        if (workspaceRepository.existsBySlugAndOwnerId(finalSlug, command.owner())) {
-            throw new RuntimeException("Slug already exists");
+        if (workspaceRepository.existsBySlug(finalSlug)) {
+            throw new RuntimeException("Workspace address (slug) is already taken. Please choose another one.");
         }
         Workspace workspace = new Workspace(
                 null,
