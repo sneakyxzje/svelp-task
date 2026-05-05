@@ -1,10 +1,13 @@
 <script lang="ts">
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
+	import { page } from '$app/state';
 
 	let { data, children } = $props();
 
 	let workspaces = $state(data?.workspaces || []);
 	let activeWorkspace = $derived(workspaces[0]);
+
+	const isBoardPage = $derived(page.url.pathname.includes('/b/'));
 </script>
 
 <div class="flex h-screen w-full overflow-hidden bg-[#08090a]">
@@ -23,10 +26,10 @@
 			</div>
 		</header>
 
-		<div class="flex-1 overflow-y-auto scroll-smooth p-8">
-			<div class="mx-auto max-w-5xl">
-				{@render children()}
-			</div>
+		<div
+			class={isBoardPage ? 'flex-1 overflow-hidden' : 'flex-1 overflow-y-auto scroll-smooth p-8'}
+		>
+			{@render children()}
 		</div>
 	</main>
 </div>
