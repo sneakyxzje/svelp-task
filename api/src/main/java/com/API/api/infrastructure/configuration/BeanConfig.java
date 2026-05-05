@@ -7,15 +7,22 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.API.api.application.port.PasswordEncode;
 import com.API.api.application.port.TokenService;
+import com.API.api.application.service.BoardPermissionService;
+import com.API.api.application.service.ColumnPermissionService;
 import com.API.api.application.service.WorkspacePermissionService;
 import com.API.api.application.usecase.auth.LoginUseCase;
 import com.API.api.application.usecase.auth.RegisterUseCase;
 import com.API.api.application.usecase.board.CreateBoardUseCase;
 import com.API.api.application.usecase.board.GetBoardByWorkspaceUseCase;
+import com.API.api.application.usecase.board.GetBoardDetailUseCase;
+import com.API.api.application.usecase.column.CreateColumnUseCase;
+import com.API.api.application.usecase.task.CreateTaskUseCase;
 import com.API.api.application.usecase.workspace.CreateWorkspaceUseCase;
 import com.API.api.application.usecase.workspace.GetUserWorkspaceUseCase;
 import com.API.api.application.usecase.workspace.GetWorkspaceBySlugUseCase;
 import com.API.api.domain.repository.BoardRepository;
+import com.API.api.domain.repository.ColumnRepository;
+import com.API.api.domain.repository.TaskRepository;
 import com.API.api.domain.repository.UserRepository;
 import com.API.api.domain.repository.WorkspaceRepository;
 
@@ -67,5 +74,36 @@ public class BeanConfig {
     @Bean
     public WorkspacePermissionService workspacePermissionService(WorkspaceRepository repo) {
         return new WorkspacePermissionService(repo);
+    }
+
+    @Bean
+    public BoardPermissionService boardPermissionService(BoardRepository repo,
+            WorkspacePermissionService workspacePermissionService) {
+        return new BoardPermissionService(repo, workspacePermissionService);
+    }
+
+    @Bean
+    public CreateColumnUseCase createColumnUseCase(ColumnRepository columnRepository,
+            BoardPermissionService boardPermissionService) {
+        return new CreateColumnUseCase(columnRepository, boardPermissionService);
+    }
+
+    @Bean
+    public ColumnPermissionService columnPermissionService(ColumnRepository columnRepository,
+            BoardPermissionService boardPermissionService) {
+        return new ColumnPermissionService(columnRepository, boardPermissionService);
+    }
+
+    @Bean
+    public CreateTaskUseCase createTaskUseCase(TaskRepository taskRepository,
+            ColumnPermissionService columnPermissionService) {
+        return new CreateTaskUseCase(taskRepository, columnPermissionService);
+    }
+
+    @Bean
+    public GetBoardDetailUseCase getBoardDetailUseCase(BoardRepository boardRepository,
+            ColumnRepository columnRepository,
+            TaskRepository taskRepository, BoardPermissionService boardPermissionService) {
+        return new GetBoardDetailUseCase(boardRepository, columnRepository, taskRepository, boardPermissionService);
     }
 }
