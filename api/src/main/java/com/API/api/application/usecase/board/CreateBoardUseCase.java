@@ -18,8 +18,8 @@ public class CreateBoardUseCase {
 
     public Board createBoard(CreateBoardCommand command, Long userId) {
         workspacePermissionService.hasPermission(userId, command.workspaceId());
-        if (boardRepository.findByName(command.name()).isPresent()) {
-            throw new RuntimeException("Board with name " + command.name() + " already exists");
+        if (boardRepository.existsBySlugAndWorkspaceId(command.slug(), command.workspaceId())) {
+            throw new RuntimeException("Board address (slug) is already taken in this workspace.");
         }
         Board board = new Board(
                 null,
