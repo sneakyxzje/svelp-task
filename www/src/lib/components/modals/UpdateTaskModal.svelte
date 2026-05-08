@@ -15,27 +15,34 @@
 	} from 'lucide-svelte';
 	import { fade, scale, slide } from 'svelte/transition';
 	import Button from '$lib/components/ui/Button.svelte';
-	import type { CreateTaskRequest } from '$lib/services/task.service';
+	import type { CreateTaskRequest, UpdateTaskRequest } from '$lib/services/task.service';
+	import type { Task } from '$lib/interface/task';
 
 	let {
 		show = $bindable(),
 		columnId,
-		onSave
+		onSave,
+		task
 	} = $props<{
 		show: boolean;
 		columnId: number | null;
-		onSave: (data: CreateTaskRequest) => Promise<void>;
+		onSave: (data: UpdateTaskRequest) => Promise<void>;
+		task: Task | null;
 	}>();
 
 	// Form State
 	let title = $state('');
 	let description = $state('');
-	let priority = $state('Medium');
+	let priority = $state('MEDIUM');
+	let status = $state('IN_PROGRESS');
 	let issueType = $state('Task');
+	let assigneeId = $state<number | null>(null);
+	let dueDate = $state<string | null>(null);
 	let isSubmitting = $state(false);
 
 	// UI State
 	let isDetailsOpen = $state(true);
+	let isDevOpen = $state(false);
 
 	const issueTypes = [
 		{ id: 'Task', icon: SquareCheck, color: '#4bce97' },
@@ -43,15 +50,24 @@
 		{ id: 'Story', icon: Zap, color: '#f59e0b' }
 	];
 
+	const statuses = [
+		{ id: 'TO_DO', label: 'To Do', color: '#42526e' },
+		{ id: 'IN_PROGRESS', label: 'In Progress', color: '#0052cc' },
+		{ id: 'DONE', label: 'Done', color: '#00875a' }
+	];
+
 	async function handleSubmit() {
-		if (!title.trim() || columnId === null) return;
+		if (!title.trim() || columnId === null || !task) return;
 		isSubmitting = true;
 
 		await onSave({
+			id: task.id,
 			title,
 			description,
 			columnId,
-			priority
+			priority,
+			assigneeId,
+			dueDate
 		});
 
 		isSubmitting = false;
@@ -60,11 +76,17 @@
 
 	function close() {
 		show = false;
-		title = '';
-		description = '';
-		priority = 'Medium';
-		issueType = 'Task';
 	}
+
+	$effect(() => {
+		if (task) {
+			title = task.title;
+			description = task.description || '';
+			priority = task.priority || 'MEDIUM';
+			assigneeId = task.assigneeId;
+			dueDate = task.dueDate;
+		}
+	});
 </script>
 
 {#if show}
@@ -84,11 +106,11 @@
 								<type.icon size={14} style="color: {type.color}" fill={type.color} />
 							{/if}
 						{/each}
-						<span class="issue-id">NEW-ISSUE</span>
+						<span class="issue-id">{task ? `SV-${task.id}` : 'NEW-ISSUE'}</span>
 					</div>
 				</div>
 				<div class="header-right">
-					<button class="icon-btn"><Eye size={16} /><span class="badge">1</span></button>
+					<button class="icon-btn"><Eye size={16} /></button>
 					<button class="icon-btn"><Share2 size={16} /></button>
 					<button class="icon-btn"><Ellipsis size={16} /></button>
 					<button class="icon-btn close" onclick={close}><X size={20} /></button>
@@ -104,14 +126,15 @@
 						<div class="action-bar">
 							<button class="action-btn"><Paperclip size={14} /> Attach</button>
 							<button class="action-btn"><Plus size={14} /> Add subtask</button>
+							<button class="action-btn"><Share2 size={14} /> Link issue</button>
 							<button class="action-btn"><Ellipsis size={14} /></button>
 						</div>
 					</div>
 
 					<div class="description-section">
 						<h3>Description</h3>
-						<div class="editor-placeholder">
-							<textarea bind:value={description} placeholder="Add a description..."></textarea>
+						<div class="editor-area">
+							<textarea bind:value={description} placeholder="Add a description..." class="description-input"></textarea>
 						</div>
 					</div>
 
@@ -134,7 +157,20 @@
 					</div>
 				</div>
 
-				<aside class="side-panel">
+				<aside class="side-panel custom-scrollbar">
+					<div class="status-section">
+						<div class="status-dropdown">
+							{#each statuses as s}
+								{#if s.id === status}
+									<div class="status-trigger" style="background: {s.color}20; color: {s.color}">
+										<span>{s.label}</span>
+										<ChevronDown size={14} />
+									</div>
+								{/if}
+							{/each}
+						</div>
+					</div>
+
 					<div class="panel-section">
 						<button class="section-toggle" onclick={() => (isDetailsOpen = !isDetailsOpen)}>
 							<ChevronDown size={14} class={isDetailsOpen ? '' : 'rotate'} />
@@ -148,16 +184,7 @@
 									<div class="value">
 										<div class="user-pill">
 											<User size={12} />
-											<span>Unassigned</span>
-										</div>
-									</div>
-								</div>
-								<div class="detail-row">
-									<span class="label">Reporter</span>
-									<div class="value">
-										<div class="user-pill">
-											<div class="avatar-mini">JD</div>
-											<span>John Doe</span>
+											<input type="number" bind:value={assigneeId} class="inline-input" placeholder="Unassigned" />
 										</div>
 									</div>
 								</div>
@@ -170,20 +197,24 @@
 												<option value="MEDIUM">Medium</option>
 												<option value="LOW">Low</option>
 											</select>
+											<span>{priority}</span>
 											<ChevronDown size={12} />
 										</div>
 									</div>
 								</div>
 								<div class="detail-row">
-									<span class="label">Labels</span>
+									<span class="label">Due date</span>
 									<div class="value">
-										<span class="empty">None</span>
+										<input type="date" bind:value={dueDate} class="inline-input" />
 									</div>
 								</div>
 								<div class="detail-row">
-									<span class="label">Due date</span>
+									<span class="label">Reporter</span>
 									<div class="value">
-										<span class="empty">None</span>
+										<div class="user-pill">
+											<div class="avatar-mini">JD</div>
+											<span>John Doe</span>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -191,14 +222,19 @@
 					</div>
 
 					<div class="panel-section mt-4">
-						<button class="section-toggle">
-							<ChevronRight size={14} />
+						<button class="section-toggle" onclick={() => (isDevOpen = !isDevOpen)}>
+							<ChevronDown size={14} class={isDevOpen ? '' : 'rotate'} />
 							<span>Development</span>
 						</button>
+						{#if isDevOpen}
+							<div class="dev-content" transition:slide>
+								<button class="dev-btn"><Plus size={14} /> Create branch</button>
+							</div>
+						{/if}
 					</div>
 
 					<div class="footer-meta">
-						<p>Created just now</p>
+						<p>Created {task ? new Date(task.createdAt).toLocaleString() : 'just now'}</p>
 						<p>Updated just now</p>
 					</div>
 				</aside>
@@ -208,7 +244,7 @@
 				<div class="footer-right">
 					<Button variant="ghost" onclick={close}>Cancel</Button>
 					<Button variant="primary" disabled={!title.trim() || isSubmitting} onclick={handleSubmit}>
-						{isSubmitting ? 'Creating...' : 'Create Issue'}
+						{isSubmitting ? 'Saving...' : 'Save Changes'}
 					</Button>
 				</div>
 			</footer>
@@ -316,54 +352,68 @@
 	.summary-input {
 		width: 100%;
 		background: transparent;
-		border: none;
+		border: 2px solid transparent;
 		color: var(--color-text-primary);
 		font-size: 24px;
 		font-weight: 600;
 		resize: none;
 		outline: none;
-		padding: 4px 0;
-		margin-bottom: 8px;
+		padding: 4px 8px;
+		margin-left: -8px;
+		border-radius: var(--radius-standard);
+		transition: all 0.2s;
+	}
+
+	.summary-input:focus {
+		background: var(--color-panel-dark);
+		border-color: var(--color-brand-indigo);
 	}
 
 	.action-bar {
 		display: flex;
-		gap: 8px;
+		flex-wrap: wrap;
+		gap: 4px;
+		margin-top: 12px;
 	}
 
 	.action-btn {
 		background: var(--color-border-subtle);
-		padding: 6px 12px;
-		border-radius: var(--radius-comfortable);
+		padding: 6px 10px;
+		border-radius: 3px;
 		font-size: 13px;
+		font-weight: 500;
 		color: var(--color-text-secondary);
 		display: flex;
 		align-items: center;
-		gap: 6px;
+		gap: 8px;
+		transition: all 0.2s;
 	}
 
 	.action-btn:hover {
 		background: var(--color-border-standard);
 	}
 
-	h3 {
-		font-size: 14px;
-		font-weight: 600;
-		color: var(--color-text-secondary);
-		margin-bottom: 12px;
+	.editor-area {
+		margin-top: 8px;
 	}
 
-	.editor-placeholder textarea {
+	.description-input {
 		width: 100%;
 		min-height: 120px;
-		background: var(--color-panel-dark);
-		border: 1px solid var(--color-border-subtle);
+		background: transparent;
+		border: 1px solid transparent;
 		border-radius: var(--radius-card);
-		padding: 12px;
+		padding: 8px;
 		color: var(--color-text-primary);
 		font-size: 14px;
 		outline: none;
 		resize: vertical;
+		transition: all 0.2s;
+	}
+
+	.description-input:focus {
+		background: var(--color-panel-dark);
+		border-color: var(--color-brand-indigo);
 	}
 
 	/* Activity Section */
@@ -435,10 +485,31 @@
 
 	/* Side Panel Styling */
 	.side-panel {
-		width: 320px;
-		border-left: 1px solid var(--color-border-subtle);
+		width: 340px;
 		padding: 24px 20px;
 		background: var(--color-marketing-black);
+		overflow-y: auto;
+	}
+
+	.status-section {
+		margin-bottom: 24px;
+	}
+
+	.status-trigger {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 6px 12px;
+		border-radius: 3px;
+		font-size: 13px;
+		font-weight: 700;
+		text-transform: uppercase;
+		cursor: pointer;
+		transition: filter 0.2s;
+	}
+
+	.status-trigger:hover {
+		filter: brightness(1.2);
 	}
 
 	.section-toggle {
@@ -450,6 +521,7 @@
 		font-weight: 600;
 		color: var(--color-text-secondary);
 		margin-bottom: 12px;
+		padding: 4px 0;
 	}
 
 	.rotate {
@@ -459,17 +531,19 @@
 	.details-grid {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 8px;
 	}
 
 	.detail-row {
 		display: flex;
 		align-items: center;
+		min-height: 32px;
 	}
 
 	.label {
-		width: 100px;
-		font-size: 12px;
+		width: 120px;
+		font-size: 13px;
+		font-weight: 500;
 		color: var(--color-text-tertiary);
 	}
 
@@ -483,14 +557,21 @@
 		align-items: center;
 		gap: 8px;
 		color: var(--color-text-secondary);
+		padding: 4px 8px;
+		border-radius: 3px;
+		transition: background 0.2s;
+	}
+
+	.user-pill:hover {
+		background: var(--color-border-subtle);
 	}
 
 	.avatar-mini {
-		width: 20px;
-		height: 20px;
+		width: 24px;
+		height: 24px;
 		background: var(--color-surface-secondary);
 		border-radius: 50%;
-		font-size: 9px;
+		font-size: 10px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -498,20 +579,44 @@
 
 	.select-field {
 		position: relative;
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		gap: 4px;
-		color: var(--color-brand-indigo);
+		padding: 4px 8px;
+		border-radius: 3px;
+		color: var(--color-text-secondary);
+		transition: background 0.2s;
+	}
+
+	.select-field:hover {
+		background: var(--color-border-subtle);
 	}
 
 	.select-field select {
 		position: absolute;
+		inset: 0;
 		opacity: 0;
 		cursor: pointer;
 	}
 
-	.empty {
-		color: var(--color-text-quaternary);
+	.dev-content {
+		padding-left: 22px;
+	}
+
+	.dev-btn {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 8px;
+		font-size: 13px;
+		color: var(--color-text-secondary);
+		border-radius: 3px;
+		transition: background 0.2s;
+	}
+
+	.dev-btn:hover {
+		background: var(--color-border-subtle);
 	}
 
 	.footer-meta {
@@ -540,8 +645,36 @@
 	.custom-scrollbar::-webkit-scrollbar {
 		width: 6px;
 	}
+	
 	.custom-scrollbar::-webkit-scrollbar-thumb {
 		background: var(--color-border-subtle);
 		border-radius: 10px;
+	}
+
+	.inline-input {
+		background: transparent;
+		border: none;
+		color: var(--color-text-secondary);
+		font-size: 13px;
+		padding: 0;
+		width: 100%;
+		outline: none;
+	}
+
+	.inline-input:hover {
+		background: var(--color-panel-dark);
+		border-color: var(--color-border-subtle);
+	}
+
+	.inline-input:focus {
+		background: var(--color-panel-dark);
+		border-color: var(--color-brand-indigo);
+	}
+
+	/* Xóa mũi tên tăng giảm của input number */
+	input::-webkit-outer-spin-button,
+	input::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
 	}
 </style>
