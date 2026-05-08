@@ -3,9 +3,14 @@
 	import { fade } from 'svelte/transition';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { columnService } from '$lib/services/column.service.js';
-	import { taskService, type CreateTaskRequest } from '$lib/services/task.service';
-	import AddTaskModal from '$lib/components/modals/AddTaskModal.svelte';
+	import {
+		taskService,
+		type CreateTaskRequest,
+		type UpdateTaskRequest
+	} from '$lib/services/task.service';
+	import UpdateTaskModal from '$lib/components/modals/UpdateTaskModal.svelte';
 	import KanbanColumn from '$lib/components/kanban/KanbanColumn.svelte';
+	import type { Task } from '$lib/interface/task.js';
 
 	const { data } = $props();
 	let board = $state(data.board);
@@ -26,27 +31,42 @@
 		}
 	};
 
-	let addTaskModalVisible = $state(false);
+	let updateTaskModalVisible = $state(false);
 	let activeColumnId = $state<number | null>(null);
+	let selectedTask = $state<Task | null>(null);
 
-	const showAddTaskModal = (columnId: number) => {
-		activeColumnId = columnId;
-		addTaskModalVisible = true;
+	const selectTask = (task: Task) => {
+		selectedTask = task;
+		activeColumnId = task.columnId;
+		updateTaskModalVisible = true;
 	};
 
-	const handleAddTask = async (taskData: CreateTaskRequest) => {
-		if (!activeColumnId || !board) return;
-		console.log(taskData);
+	const addTask = async (taskData: CreateTaskRequest) => {
+		if (!board) return;
 		const { data: newTask, error } = await taskService.create(taskData);
 		if (newTask) {
 			board.columns = board.columns.map((col) => {
-				if (col.id === activeColumnId) {
+				if (col.id === taskData.columnId) {
 					return { ...col, tasks: [...col.tasks, newTask] };
 				}
 				return col;
 			});
-		} else {
-			console.error(error);
+		}
+	};
+
+	const updateTask = async (taskData: UpdateTaskRequest) => {
+		if (!board) return;
+		const { data: updateTask, error } = await taskService.update(taskData);
+		if (updateTask) {
+			board.columns = board.columns.map((col) => {
+				if (col.id === updateTask.columnId) {
+					return {
+						...col,
+						tasks: col.tasks.map((t) => (t.id === updateTask.id ? updateTask : t))
+					};
+				}
+				return col;
+			});
 		}
 	};
 
@@ -86,7 +106,11 @@
 	<main class="kanban-scroll-area custom-scrollbar">
 		<div class="kanban-canvas">
 			{#each sortedColumns as column (column.id)}
-				<KanbanColumn {column} onAddTask={showAddTaskModal} />
+				<KanbanColumn
+					{column}
+					onAddTask={addTask}
+					onTaskClick={(task) => selectTask(task)}
+				/>
 			{/each}
 
 			{#if sortedColumns.length === 0}
@@ -99,7 +123,12 @@
 	</main>
 </div>
 
-<AddTaskModal bind:show={addTaskModalVisible} columnId={activeColumnId} onSave={handleAddTask} />
+<UpdateTaskModal
+	bind:show={updateTaskModalVisible}
+	columnId={activeColumnId}
+	onSave={updateTask}
+	task={selectedTask}
+/>
 
 <style>
 	.board-wrapper {
