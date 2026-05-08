@@ -67,6 +67,38 @@ const createMethods = (f: Fetcher) => {
 			} catch (err) {
 				return { data: null, error: 'Unknown Error' };
 			}
+		},
+		async patch<T>(
+			url: string,
+			rawBody: unknown
+		): Promise<{ data: T | null; error: string | null }> {
+			let headers: Record<string, string> = {};
+			let body: string;
+
+			if (rawBody !== null && typeof rawBody === 'object') {
+				body = JSON.stringify(rawBody);
+				headers['Content-Type'] = 'application/json';
+			} else {
+				body = JSON.stringify({ value: rawBody });
+				headers['Content-Type'] = 'application/json';
+			}
+
+			try {
+				const response = await f(BASE_URL + url, {
+					method: 'PATCH',
+					headers,
+					body: body,
+					credentials: 'include'
+				});
+
+				if (!response.ok) {
+					return { data: null, error: `Error Status: ${response.status}` };
+				}
+				const data = await response.json();
+				return { data: data as T, error: null };
+			} catch (err) {
+				return { data: null, error: 'Unknown error' };
+			}
 		}
 	};
 };
