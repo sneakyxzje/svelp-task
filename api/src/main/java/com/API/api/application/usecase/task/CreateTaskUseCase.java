@@ -1,6 +1,5 @@
 package com.API.api.application.usecase.task;
 
-import java.time.LocalDateTime;
 import com.API.api.application.command.CreateTaskCommand;
 import com.API.api.application.service.ColumnPermissionService;
 import com.API.api.domain.model.Column;
@@ -22,15 +21,14 @@ public class CreateTaskUseCase {
         Task task = new Task(
                 null,
                 command.title(),
-                command.description(),
+                null,
                 column.getId(),
                 newPos,
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                command.priority(),
-                command.assigneeId(),
-                command.dueDate());
-
+                null,
+                null,
+                null,
+                null,
+                null);
         return taskRepository.save(task);
     }
 }
