@@ -2,11 +2,19 @@
 	import { Plus, MoreHorizontal } from 'lucide-svelte';
 	import KanbanTask from './KanbanTask.svelte';
 	import type { ColumnDetail } from '$lib/interface/column';
+	import Input from '../ui/Input.svelte';
+	import type { CreateTaskRequest } from '$lib/services/task.service';
+	import type { Task } from '$lib/interface/task';
 
-	let { column, onAddTask } = $props<{
+	let { column, onAddTask, onTaskClick } = $props<{
 		column: ColumnDetail;
-		onAddTask: (id: number) => void;
+		onAddTask: (taskData: CreateTaskRequest) => void;
+		onTaskClick: (task: Task) => void;
 	}>();
+
+	let isAdding = $state<boolean>(false);
+
+	let newTaskTitle = $state<string>('');
 </script>
 
 <section class="kanban-column">
@@ -27,12 +35,37 @@
 
 	<div class="column-content custom-scrollbar">
 		{#each column.tasks as task (task.id)}
-			<KanbanTask {task} />
+			<KanbanTask {task} {onTaskClick} />
 		{/each}
 
-		<button onclick={() => onAddTask(column.id)} class="add-task-btn">
-			<Plus size={14} />
-			<span>Add task</span>
+		<button
+			onclick={() => {
+				isAdding = true;
+			}}
+			class="add-task-btn"
+		>
+			{#if isAdding}
+				<Input
+					bind:value={newTaskTitle}
+					placeholder="Task title..."
+					onkeydown={(e: KeyboardEvent) => {
+						if (e.key === 'Enter' && newTaskTitle.trim()) {
+							onAddTask({
+								title: newTaskTitle,
+								columnId: column.id
+							});
+							newTaskTitle = '';
+							isAdding = false;
+						} else if (e.key === 'Escape') {
+							newTaskTitle = '';
+							isAdding = false;
+						}
+					}}
+				/>
+			{:else}
+				<Plus size={14} />
+				<span>Add task</span>
+			{/if}
 		</button>
 	</div>
 </section>
