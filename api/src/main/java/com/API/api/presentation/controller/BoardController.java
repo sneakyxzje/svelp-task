@@ -67,7 +67,8 @@ public class BoardController {
                         @PathVariable String workspaceSlug,
                         @PathVariable String boardSlug,
                         @AuthenticationPrincipal UserPrincipal principal) {
-                BoardDetailCommand command = getBoardDetailUseCase.getBoardDetails(workspaceSlug, boardSlug, principal.getId());
+                BoardDetailCommand command = getBoardDetailUseCase.getBoardDetails(workspaceSlug, boardSlug,
+                                principal.getId());
                 List<ColumnWithTasksResponse> columns = command.columns().stream()
                                 .map(column -> new ColumnWithTasksResponse(
                                                 column.getId(),
