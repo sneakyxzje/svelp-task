@@ -17,6 +17,7 @@ import com.API.api.application.usecase.board.GetBoardByWorkspaceUseCase;
 import com.API.api.application.usecase.board.GetBoardDetailUseCase;
 import com.API.api.application.usecase.column.CreateColumnUseCase;
 import com.API.api.application.usecase.task.CreateTaskUseCase;
+import com.API.api.application.usecase.task.UpdateTaskUseCase;
 import com.API.api.application.usecase.workspace.CreateWorkspaceUseCase;
 import com.API.api.application.usecase.workspace.GetUserWorkspaceUseCase;
 import com.API.api.application.usecase.workspace.GetWorkspaceBySlugUseCase;
@@ -98,6 +99,12 @@ public class BeanConfig {
     public CreateTaskUseCase createTaskUseCase(TaskRepository taskRepository,
             ColumnPermissionService columnPermissionService) {
         return new CreateTaskUseCase(taskRepository, columnPermissionService);
+    }
+
+    @Bean
+    public UpdateTaskUseCase updateTaskUseCase(TaskRepository taskRepository,
+            ColumnPermissionService columnPermissionService) {
+        return new UpdateTaskUseCase(taskRepository, columnPermissionService);
     }
 
     @Bean
