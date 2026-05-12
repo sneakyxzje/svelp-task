@@ -3,18 +3,55 @@
 	import KanbanTask from './KanbanTask.svelte';
 	import type { ColumnDetail } from '$lib/interface/column';
 	import Input from '../ui/Input.svelte';
-	import type { CreateTaskRequest } from '$lib/services/task.service';
-	import type { Task } from '$lib/interface/task';
+	import type { CreateTaskRequest, Task } from '$lib/interface/task';
+	import { dndzone, TRIGGERS, type DndEvent } from 'svelte-dnd-action';
+	import { taskService } from '$lib/services/task.service';
 
-	let { column, onAddTask, onTaskClick } = $props<{
+	let { column, onTasksChange, onAddTask, onTaskClick } = $props<{
 		column: ColumnDetail;
 		onAddTask: (taskData: CreateTaskRequest) => void;
+		onTasksChange: (newTasks: Task[]) => void;
 		onTaskClick: (task: Task) => void;
 	}>();
+	let tasks = $state.raw<Task[]>($state.snapshot(column.tasks) as Task[]);
 
 	let isAdding = $state<boolean>(false);
 
 	let newTaskTitle = $state<string>('');
+
+	const handleDndConsider = (e: CustomEvent<DndEvent>) => {
+		tasks = [...e.detail.items] as Task[];
+	};
+
+	const handleDndFinalize = async (e: CustomEvent<DndEvent>) => {
+		const { items, info } = e.detail;
+		tasks = [...items] as Task[];
+
+		if (info.trigger === TRIGGERS.DROPPED_INTO_ZONE) {
+			console.log(tasks);
+			const movedTaskId = info.id;
+
+			const index = tasks.findIndex((t) => String(t.id) === String(movedTaskId));
+
+			if (index !== -1) {
+				const prevTask = index > 0 ? tasks[index - 1] : null;
+				const nextTask = index < tasks.length - 1 ? tasks[index + 1] : null;
+
+				const prevPos = prevTask ? prevTask.position : null;
+				const nextPos = nextTask ? nextTask.position : null;
+				const response = await taskService.move(Number(movedTaskId), {
+					targetColumnId: column.id,
+					prevTaskPosition: prevPos,
+					nextTaskPosition: nextPos
+				});
+				if (response.error) {
+					console.error(response.error);
+				} else {
+					onTasksChange(tasks);
+				}
+			}
+		}
+	};
 </script>
 
 <section class="kanban-column">
@@ -33,11 +70,29 @@
 		</div>
 	</header>
 
-	<div class="column-content custom-scrollbar">
-		{#each column.tasks as task (task.id)}
+	<div
+		class="column-content custom-scrollbar"
+		use:dndzone={{
+			items: tasks,
+			flipDurationMs: 0,
+			transformDraggedElement: (el) => {
+				if (!el) return;
+				el.style.transform = 'rotate(2deg) scale(1.02)';
+				el.style.boxShadow = '0 16px 32px rgba(0,0,0,0.4)';
+				el.style.cursor = 'grabbing';
+			},
+			morphDisabled: true,
+			dropTargetStyle: {}
+		}}
+		onconsider={handleDndConsider}
+		onfinalize={handleDndFinalize}
+	>
+		{#each tasks as task (task.id)}
 			<KanbanTask {task} {onTaskClick} />
 		{/each}
+	</div>
 
+	<div class="column-footer">
 		<button
 			onclick={() => {
 				isAdding = true;
@@ -130,7 +185,14 @@
 		flex-direction: column;
 		gap: 8px;
 		overflow-y: auto;
-		padding: 0 12px 16px 12px;
+		flex: 1;
+		padding: 8px 12px;
+		min-height: 60px;
+	}
+
+	.column-footer {
+		padding: 4px 12px 12px 12px;
+		flex-shrink: 0;
 	}
 
 	.add-task-btn {
@@ -144,7 +206,6 @@
 		font-weight: 500;
 		border-radius: var(--radius-comfortable);
 		transition: all 0.2s;
-		margin-top: 4px;
 	}
 
 	.add-task-btn:hover {
@@ -152,7 +213,6 @@
 		color: var(--color-text-secondary);
 	}
 
-	/* Custom Scrollbar */
 	.custom-scrollbar::-webkit-scrollbar {
 		width: 4px;
 	}
