@@ -3,14 +3,10 @@
 	import { fade } from 'svelte/transition';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { columnService } from '$lib/services/column.service.js';
-	import {
-		taskService,
-		type CreateTaskRequest,
-		type UpdateTaskRequest
-	} from '$lib/services/task.service';
+	import { taskService } from '$lib/services/task.service';
 	import UpdateTaskModal from '$lib/components/modals/UpdateTaskModal.svelte';
 	import KanbanColumn from '$lib/components/kanban/KanbanColumn.svelte';
-	import type { Task } from '$lib/interface/task.js';
+	import type { CreateTaskRequest, Task, UpdateTaskRequest } from '$lib/interface/task.js';
 
 	const { data } = $props();
 	let board = $state(data.board);
@@ -110,6 +106,10 @@
 					{column}
 					onAddTask={addTask}
 					onTaskClick={(task) => selectTask(task)}
+					onTasksChange={(newTasks) => {
+						const col = board?.columns.find((c) => c.id === column.id);
+						if (col) col.tasks = newTasks;
+					}}
 				/>
 			{/each}
 
