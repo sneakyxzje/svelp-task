@@ -15,8 +15,7 @@
 	} from 'lucide-svelte';
 	import { fade, scale, slide } from 'svelte/transition';
 	import Button from '$lib/components/ui/Button.svelte';
-	import type { CreateTaskRequest, UpdateTaskRequest } from '$lib/services/task.service';
-	import type { Task } from '$lib/interface/task';
+	import type { Task, UpdateTaskRequest } from '$lib/interface/task';
 
 	let {
 		show = $bindable(),
@@ -30,7 +29,6 @@
 		task: Task | null;
 	}>();
 
-	// Form State
 	let title = $state('');
 	let description = $state('');
 	let priority = $state('MEDIUM');
@@ -40,7 +38,6 @@
 	let dueDate = $state<string | null>(null);
 	let isSubmitting = $state(false);
 
-	// UI State
 	let isDetailsOpen = $state(true);
 	let isDevOpen = $state(false);
 
@@ -134,7 +131,11 @@
 					<div class="description-section">
 						<h3>Description</h3>
 						<div class="editor-area">
-							<textarea bind:value={description} placeholder="Add a description..." class="description-input"></textarea>
+							<textarea
+								bind:value={description}
+								placeholder="Add a description..."
+								class="description-input"
+							></textarea>
 						</div>
 					</div>
 
@@ -184,7 +185,12 @@
 									<div class="value">
 										<div class="user-pill">
 											<User size={12} />
-											<input type="number" bind:value={assigneeId} class="inline-input" placeholder="Unassigned" />
+											<input
+												type="number"
+												bind:value={assigneeId}
+												class="inline-input"
+												placeholder="Unassigned"
+											/>
 										</div>
 									</div>
 								</div>
@@ -645,7 +651,7 @@
 	.custom-scrollbar::-webkit-scrollbar {
 		width: 6px;
 	}
-	
+
 	.custom-scrollbar::-webkit-scrollbar-thumb {
 		background: var(--color-border-subtle);
 		border-radius: 10px;
@@ -671,7 +677,6 @@
 		border-color: var(--color-brand-indigo);
 	}
 
-	/* Xóa mũi tên tăng giảm của input number */
 	input::-webkit-outer-spin-button,
 	input::-webkit-inner-spin-button {
 		-webkit-appearance: none;
