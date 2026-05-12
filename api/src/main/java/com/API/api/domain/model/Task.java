@@ -69,12 +69,21 @@ public class Task {
     public LocalDateTime getDueDate() {
         return this.dueDate;
     }
+
     public void setTitle(String title) {
         this.title = title;
     }
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public void setPosition(Double position) {
+        this.position = position;
+    }
+
+    public void setColumnId(Long columnId) {
+        this.columnId = columnId;
     }
 
     public void setPriority(Priority priority) {
