@@ -22,7 +22,7 @@
 	let pInfo = $derived(getPriorityIcon(task.priority));
 </script>
 
-<div class="task-card" in:fly={{ y: 10, duration: 300 }}>
+<div class="task-card">
 	<div class="drag-handle">
 		<GripVertical size={14} />
 	</div>
@@ -32,7 +32,6 @@
 
 		<div class="task-mid">
 			<div class="task-id-group">
-				<SquareCheck size={14} class="issue-type-icon" fill="#4bce97" />
 				<span class="task-id">SV-{task.id}</span>
 			</div>
 		</div>
