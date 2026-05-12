@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.API.api.application.port.PasswordEncode;
 import com.API.api.application.port.TokenService;
+import com.API.api.application.port.TransactionManager;
 import com.API.api.application.service.BoardPermissionService;
 import com.API.api.application.service.ColumnPermissionService;
 import com.API.api.application.service.WorkspacePermissionService;
@@ -17,6 +18,7 @@ import com.API.api.application.usecase.board.GetBoardByWorkspaceUseCase;
 import com.API.api.application.usecase.board.GetBoardDetailUseCase;
 import com.API.api.application.usecase.column.CreateColumnUseCase;
 import com.API.api.application.usecase.task.CreateTaskUseCase;
+import com.API.api.application.usecase.task.MoveTaskUseCase;
 import com.API.api.application.usecase.task.UpdateTaskUseCase;
 import com.API.api.application.usecase.workspace.CreateWorkspaceUseCase;
 import com.API.api.application.usecase.workspace.GetUserWorkspaceUseCase;
@@ -113,4 +115,11 @@ public class BeanConfig {
             TaskRepository taskRepository, BoardPermissionService boardPermissionService) {
         return new GetBoardDetailUseCase(boardRepository, columnRepository, taskRepository, boardPermissionService);
     }
+
+    @Bean
+    public MoveTaskUseCase moveTaskUseCase(TaskRepository taskRepository,
+            ColumnPermissionService columnPermissionService, TransactionManager transactionManager) {
+        return new MoveTaskUseCase(taskRepository, columnPermissionService, transactionManager);
+    }
+
 }
