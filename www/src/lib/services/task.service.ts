@@ -1,26 +1,8 @@
 import { http } from '$lib/http/http';
-import type { Task } from '$lib/interface/task';
-
-export interface CreateTaskRequest {
-	title: string;
-	description?: string;
-	columnId: number;
-	priority?: string;
-	assigneeId?: number | null;
-	dueDate?: string | null;
-}
-
-export interface UpdateTaskRequest {
-	id: number;
-	title: string;
-	description?: string;
-	columnId: number;
-	priority?: string;
-	assigneeId?: number | null;
-	dueDate?: string | null;
-}
+import type { CreateTaskRequest, MoveTaskRequest, Task } from '$lib/interface/task';
 
 export const taskService = {
 	create: (data: CreateTaskRequest) => http.post<Task>('/tasks', data),
-	update: (data: Partial<Task> & { id: number }) => http.patch<Task>(`/tasks/${data.id}`, data)
+	update: (data: Partial<Task> & { id: number }) => http.patch<Task>(`/tasks/${data.id}`, data),
+	move: (taskId: number, data: MoveTaskRequest) => http.patch<Task>(`/tasks/${taskId}/move`, data)
 };
