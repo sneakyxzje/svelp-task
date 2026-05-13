@@ -4,64 +4,41 @@
 	import type { ColumnDetail } from '$lib/interface/column';
 	import Input from '../ui/Input.svelte';
 	import type { CreateTaskRequest, Task } from '$lib/interface/task';
-	import { dndzone, TRIGGERS, type DndEvent } from 'svelte-dnd-action';
-	import { taskService } from '$lib/services/task.service';
-
-	let { column, onTasksChange, onAddTask, onTaskClick } = $props<{
+	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+	interface Props {
 		column: ColumnDetail;
 		onAddTask: (taskData: CreateTaskRequest) => void;
 		onTasksChange: (newTasks: Task[]) => void;
 		onTaskClick: (task: Task) => void;
-	}>();
-	let tasks = $state.raw<Task[]>($state.snapshot(column.tasks) as Task[]);
+	}
+
+	let { column, onTasksChange, onAddTask, onTaskClick }: Props = $props();
 
 	let isAdding = $state<boolean>(false);
-
 	let newTaskTitle = $state<string>('');
 
-	const handleDndConsider = (e: CustomEvent<DndEvent>) => {
-		tasks = [...e.detail.items] as Task[];
-	};
+	let columnEl: HTMLElement | null = $state(null);
 
-	const handleDndFinalize = async (e: CustomEvent<DndEvent>) => {
-		const { items, info } = e.detail;
-		tasks = [...items] as Task[];
-
-		if (info.trigger === TRIGGERS.DROPPED_INTO_ZONE) {
-			console.log(tasks);
-			const movedTaskId = info.id;
-
-			const index = tasks.findIndex((t) => String(t.id) === String(movedTaskId));
-
-			if (index !== -1) {
-				const prevTask = index > 0 ? tasks[index - 1] : null;
-				const nextTask = index < tasks.length - 1 ? tasks[index + 1] : null;
-
-				const prevPos = prevTask ? prevTask.position : null;
-				const nextPos = nextTask ? nextTask.position : null;
-				const response = await taskService.move(Number(movedTaskId), {
-					targetColumnId: column.id,
-					prevTaskPosition: prevPos,
-					nextTaskPosition: nextPos
-				});
-				if (response.error) {
-					console.error(response.error);
-				} else {
-					onTasksChange(tasks);
-				}
-			}
-		}
-	};
+	$effect(() => {
+		if (!columnEl) return;
+		return dropTargetForElements({
+			element: columnEl,
+			getData: () => ({
+				columnId: column.id,
+				type: 'column'
+			})
+		});
+	});
 </script>
 
-<section class="kanban-column">
+<section class="kanban-column" bind:this={columnEl}>
 	<header class="column-header">
 		<div class="column-title">
 			<span class="count">{column.tasks?.length ?? 0}</span>
 			<h2>{column.name}</h2>
 		</div>
 		<div class="column-actions">
-			<button onclick={() => onAddTask(column.id)} class="icon-btn">
+			<button onclick={() => (isAdding = true)} class="icon-btn">
 				<Plus size={16} />
 			</button>
 			<button class="icon-btn">
@@ -70,25 +47,11 @@
 		</div>
 	</header>
 
-	<div
-		class="column-content custom-scrollbar"
-		use:dndzone={{
-			items: tasks,
-			flipDurationMs: 0,
-			transformDraggedElement: (el) => {
-				if (!el) return;
-				el.style.transform = 'rotate(2deg) scale(1.02)';
-				el.style.boxShadow = '0 16px 32px rgba(0,0,0,0.4)';
-				el.style.cursor = 'grabbing';
-			},
-			morphDisabled: true,
-			dropTargetStyle: {}
-		}}
-		onconsider={handleDndConsider}
-		onfinalize={handleDndFinalize}
-	>
-		{#each tasks as task (task.id)}
-			<KanbanTask {task} {onTaskClick} />
+	<div class="column-content custom-scrollbar draggable-task">
+		{#each column.tasks as task (task.id)}
+			<div class="task-wrapper">
+				<KanbanTask {task} {onTaskClick} />
+			</div>
 		{/each}
 	</div>
 
