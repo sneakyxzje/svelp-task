@@ -11,6 +11,7 @@ export interface Task {
 }
 
 export interface CreateTaskRequest {
+	id?: number;
 	title: string;
 	description?: string;
 	columnId: number;
