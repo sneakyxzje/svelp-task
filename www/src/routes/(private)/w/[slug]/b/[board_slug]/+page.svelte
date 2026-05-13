@@ -7,7 +7,9 @@
 	import UpdateTaskModal from '$lib/components/modals/UpdateTaskModal.svelte';
 	import KanbanColumn from '$lib/components/kanban/KanbanColumn.svelte';
 	import type { CreateTaskRequest, Task, UpdateTaskRequest } from '$lib/interface/task.js';
-
+	import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+	import { reorder } from '@atlaskit/pragmatic-drag-and-drop/reorder';
+	import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 	const { data } = $props();
 	let board = $state(data.board);
 
@@ -68,6 +70,76 @@
 
 	$effect(() => {
 		board = data.board;
+
+		monitorForElements({
+			onDrop: ({ source, location }) => {
+				const destination = location.current.dropTargets[0];
+				if (!destination) return;
+				if (!board) return;
+				const sourceData = source.data;
+				const targetData = destination.data;
+
+				const sourceColumn = board.columns.find((c) => c.id === sourceData.columnId);
+				const targetColumnId =
+					targetData.type === 'task' ? targetData.columnId : targetData.columnId;
+				const targetColumn = board.columns.find((c) => c.id === targetColumnId);
+				if (!sourceColumn || !targetColumn) return;
+				const draggingTask = sourceColumn.tasks.find((t) => t.id === sourceData.taskId);
+				if (!draggingTask) return;
+				if (sourceColumn.id === targetColumn.id) {
+					if (targetData.type === 'task') {
+						const startIndex = sourceColumn.tasks.findIndex((t) => t.id === sourceData.taskId);
+						let finishIndex = sourceColumn.tasks.findIndex((t) => t.id === targetData.taskId);
+						const edge = extractClosestEdge(destination.data);
+						if (edge === 'bottom') {
+							finishIndex++;
+						}
+						sourceColumn.tasks = reorder({
+							list: sourceColumn.tasks,
+							startIndex,
+							finishIndex
+						});
+					}
+				} else {
+					sourceColumn.tasks = sourceColumn.tasks.filter((t) => t.id !== draggingTask.id);
+					const updatedTask = { ...draggingTask, columnId: targetColumn.id };
+
+					if (targetData.type === 'task') {
+						const targetTaskIndex = targetColumn.tasks.findIndex((t) => t.id === targetData.taskId);
+						const edge = extractClosestEdge(destination.data);
+						const insertIndex = edge === 'bottom' ? targetTaskIndex + 1 : targetTaskIndex;
+						const newTasks = [...targetColumn.tasks];
+						newTasks.splice(insertIndex, 0, updatedTask);
+						targetColumn.tasks = newTasks;
+					} else if (targetData.type === 'column') {
+						targetColumn.tasks = [...targetColumn.tasks, updatedTask];
+					}
+				}
+				board.columns = [...board.columns];
+				const currentTargetColumn = board.columns.find((c) => c.id === targetColumn.id);
+				if (!currentTargetColumn) return;
+				const newIndex = currentTargetColumn.tasks.findIndex((t) => t.id === draggingTask.id);
+				if (newIndex === -1) return;
+				const prevTask = currentTargetColumn.tasks[newIndex - 1];
+				const prevTaskPosition = prevTask ? prevTask.position : null;
+				const nextTask = currentTargetColumn.tasks[newIndex + 0 + 1];
+				const nextTaskPosition = nextTask ? nextTask.position : null;
+				taskService
+					.move(draggingTask.id, {
+						targetColumnId: currentTargetColumn.id,
+						prevTaskPosition,
+						nextTaskPosition
+					})
+					.then((response) => {
+						if (response?.data) {
+							currentTargetColumn.tasks[newIndex].position = response.data.position;
+						}
+					})
+					.catch((error) => {
+						console.error('Lỗi di chuyển task:', error);
+					});
+			}
+		});
 	});
 </script>
 
@@ -108,7 +180,10 @@
 					onTaskClick={(task) => selectTask(task)}
 					onTasksChange={(newTasks) => {
 						const col = board?.columns.find((c) => c.id === column.id);
-						if (col) col.tasks = newTasks;
+						if (col && board) {
+							col.tasks = newTasks;
+							board.columns = [...board.columns];
+						}
 					}}
 				/>
 			{/each}
