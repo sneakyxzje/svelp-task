@@ -120,23 +120,3 @@
 	outline: none !important;
 	box-shadow: none !important;
 }
-
-.dnd-action-shadow-item {
-	opacity: 1 !important;
-	visibility: visible !important;
-	background: rgba(94, 106, 210, 0.06) !important;
-	border: 1.5px dashed rgba(94, 106, 210, 0.35) !important;
-	border-radius: 4px !important;
-	box-shadow: none !important;
-	outline: none !important;
-	min-height: 80px !important;
-}
-
-.dnd-action-shadow-item > * {
-	visibility: hidden !important;
-	opacity: 0 !important;
-}
-
-.dnd-action-dragged-el {
-	opacity: 0.5 !important;
-}
