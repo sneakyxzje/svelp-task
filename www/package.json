@@ -45,10 +45,11 @@
 		"vitest-browser-svelte": "^2.1.0"
 	},
 	"dependencies": {
+		"@atlaskit/pragmatic-drag-and-drop": "^1.8.1",
+		"@atlaskit/pragmatic-drag-and-drop-hitbox": "^1.1.0",
 		"bits-ui": "^2.18.0",
 		"clsx": "^2.1.1",
 		"lucide-svelte": "^1.0.1",
-		"svelte-dnd-action": "^0.9.69",
 		"svelte-sonner": "^1.1.1",
 		"tailwind-merge": "^3.5.0"
 	}
